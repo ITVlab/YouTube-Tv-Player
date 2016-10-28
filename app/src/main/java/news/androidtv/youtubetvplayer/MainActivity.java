@@ -8,12 +8,13 @@ import news.androidtv.libs.player.YouTubePlayerView;
 /**
  * Created by Nick on 10/27/2016.
  */
-
 public class MainActivity extends Activity {
+    private YouTubePlayerView mPlayer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sample_youtube);
-        ((YouTubePlayerView) findViewById(R.id.player_youtube)).loadVideo("MeB3eYk1Ze0");
+        mPlayer = ((YouTubePlayerView) findViewById(R.id.player_youtube));
+        mPlayer.loadVideo("q0P4SFrjA4Y");
     }
 }

@@ -8,12 +8,12 @@ import android.webkit.WebView;
 /**
  * Created by Nick on 10/27/2016.
  */
-
 public abstract class AbstractWebPlayer extends WebView {
     private static final String TAG = AbstractWebPlayer.class.getSimpleName();
     private static final boolean DEBUG = true;
 
-    private WebEventsListener mListener;
+    private WebEventsListener mWebListener;
+    private VideoEventsListener mVideoListener;
 
     public AbstractWebPlayer(Context context) {
         super(context);
@@ -36,7 +36,7 @@ public abstract class AbstractWebPlayer extends WebView {
     }
 
     private void initialize(Context context) {
-        mListener = new WebEventsListener() {
+        mWebListener = new WebEventsListener() {
             @Override
             public void onWindowLoad() {
                 if (DEBUG) {
@@ -44,13 +44,37 @@ public abstract class AbstractWebPlayer extends WebView {
                 }
                 onPlayVideo();
             }
+
+            @Override
+            public void onVideoStatusEnded() {
+                if (DEBUG) {
+                    Log.d(TAG, "Video ended");
+                }
+                onEndVideo();
+                if (mVideoListener != null) {
+                    mVideoListener.onVideoEnded();
+                }
+            }
         };
         getSettings().setJavaScriptEnabled(true);
         getSettings().setSupportZoom(false);
         getSettings().setSupportMultipleWindows(false);
-        setWebViewClient(new WebPlayerClient(this, mListener));
+        setWebViewClient(new WebPlayerClient(this, mWebListener));
+        addJavascriptInterface(new WebInterface(context, this), "Android");
         getSettings().setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.35 Safari/537.36"); //Claim to be a desktop
         setKeepScreenOn(true);
+    }
+
+    public void setVideoEventsListener(VideoEventsListener listener) {
+        mVideoListener = listener;
+    }
+
+    public VideoEventsListener getVideoEventsListener() {
+        return mVideoListener;
+    }
+
+    protected WebEventsListener getWebEventsListener() {
+        return mWebListener;
     }
 
     public void setVideoUrlTo(String url) {
@@ -77,8 +101,14 @@ public abstract class AbstractWebPlayer extends WebView {
     }
 
     protected abstract void onPlayVideo();
+    protected abstract void onEndVideo();
 
     public interface WebEventsListener {
         void onWindowLoad();
+        void onVideoStatusEnded();
+    }
+
+    public interface VideoEventsListener {
+        void onVideoEnded();
     }
 }
