@@ -1,9 +1,12 @@
 package news.androidtv.libs.player;
 
 import android.content.Context;
+import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.WebView;
+
+import java.util.List;
 
 /**
  * Created by Nick on 10/27/2016.
@@ -13,7 +16,7 @@ public abstract class AbstractWebPlayer extends WebView {
     private static final boolean DEBUG = true;
 
     private WebEventsListener mWebListener;
-    private VideoEventsListener mVideoListener;
+    private List<VideoEventsListener> mVideoListeners;
 
     public AbstractWebPlayer(Context context) {
         super(context);
@@ -51,8 +54,10 @@ public abstract class AbstractWebPlayer extends WebView {
                     Log.d(TAG, "Video ended");
                 }
                 onEndVideo();
-                if (mVideoListener != null) {
-                    mVideoListener.onVideoEnded();
+                if (mVideoListeners != null) {
+                    for (VideoEventsListener listener : mVideoListeners) {
+                        listener.onVideoEnded();
+                    }
                 }
             }
         };
@@ -65,12 +70,17 @@ public abstract class AbstractWebPlayer extends WebView {
         setKeepScreenOn(true);
     }
 
-    public void setVideoEventsListener(VideoEventsListener listener) {
-        mVideoListener = listener;
+    public void addVideoEventsListener(VideoEventsListener listener) {
+        mVideoListeners.add(listener);
     }
 
+    public void removeVideoEventsListener(VideoEventsListener listener) {
+        mVideoListeners.remove(listener);
+    }
+
+    @Deprecated
     public VideoEventsListener getVideoEventsListener() {
-        return mVideoListener;
+        return mVideoListeners.get(0);
     }
 
     protected WebEventsListener getWebEventsListener() {
