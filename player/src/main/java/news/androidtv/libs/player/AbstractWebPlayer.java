@@ -4,19 +4,24 @@ import android.content.Context;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Surface;
 import android.webkit.WebView;
+
+import com.google.android.media.tv.companionlibrary.TvPlayer;
 
 import java.util.List;
 
 /**
  * Created by Nick on 10/27/2016.
  */
-public abstract class AbstractWebPlayer extends WebView {
+public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
     private static final String TAG = AbstractWebPlayer.class.getSimpleName();
     private static final boolean DEBUG = true;
 
     private WebEventsListener mWebListener;
     private List<VideoEventsListener> mVideoListeners;
+    private long mCurrentPos;
+    private long mDuration;
 
     public AbstractWebPlayer(Context context) {
         super(context);
@@ -60,6 +65,16 @@ public abstract class AbstractWebPlayer extends WebView {
                     }
                 }
             }
+
+            @Override
+            public void onPositionChanged(long position) {
+                mCurrentPos = position;
+            }
+
+            @Override
+            public void onReceivedDuration(long duration) {
+                mDuration = duration;
+            }
         };
         getSettings().setJavaScriptEnabled(true);
         getSettings().setSupportZoom(false);
@@ -76,11 +91,6 @@ public abstract class AbstractWebPlayer extends WebView {
 
     public void removeVideoEventsListener(VideoEventsListener listener) {
         mVideoListeners.remove(listener);
-    }
-
-    @Deprecated
-    public VideoEventsListener getVideoEventsListener() {
-        return mVideoListeners.get(0);
     }
 
     protected WebEventsListener getWebEventsListener() {
@@ -110,12 +120,27 @@ public abstract class AbstractWebPlayer extends WebView {
         });
     }
 
+    public long getCurrentPosition() {
+        return mCurrentPos;
+    }
+
+    public long getDuration() {
+        return mDuration;
+    }
+
+    @Override
+    public void setSurface(Surface surface) {
+        // Ignore this since we don't use surfaces
+    }
+
     protected abstract void onPlayVideo();
     protected abstract void onEndVideo();
 
     public interface WebEventsListener {
         void onWindowLoad();
         void onVideoStatusEnded();
+        void onPositionChanged(long position);
+        void onReceivedDuration(long duration);
     }
 
     public interface VideoEventsListener {

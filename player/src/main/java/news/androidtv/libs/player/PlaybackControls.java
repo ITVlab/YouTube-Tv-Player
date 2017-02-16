@@ -3,7 +3,7 @@ package news.androidtv.libs.player;
 /**
  *
  */
-public interface MediaControls {
+public interface PlaybackControls {
     void play();
     void pause();
     void skip(long ms);

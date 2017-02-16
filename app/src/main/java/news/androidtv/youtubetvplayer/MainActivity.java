@@ -15,6 +15,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sample_youtube);
         mPlayer = ((YouTubePlayerView) findViewById(R.id.player_youtube));
-        mPlayer.loadVideo("q0P4SFrjA4Y");
+        mPlayer.loadVideo("kjEmkdrdRtI");
     }
 }

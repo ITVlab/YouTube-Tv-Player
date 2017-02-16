@@ -28,4 +28,14 @@ public class WebInterface {
     public void videoEnded() {
         mAbstractWebPlayer.getWebEventsListener().onVideoStatusEnded();
     }
+
+    @JavascriptInterface
+    public void updatePosition(int position) {
+        mAbstractWebPlayer.getWebEventsListener().onPositionChanged(position);
+    }
+
+    @JavascriptInterface
+    public void updateDuration(int position) {
+        mAbstractWebPlayer.getWebEventsListener().onReceivedDuration(position);
+    }
 }
