@@ -4,11 +4,7 @@ import android.content.Context;
 import android.media.PlaybackParams;
 import android.os.Handler;
 import android.os.Looper;
-import android.telecom.Call;
 import android.util.AttributeSet;
-import android.view.Surface;
-
-import com.google.android.media.tv.companionlibrary.TvPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +73,7 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
     @Override
     public void play() {
         runJavascript("yt.player.getPlayerByElement('player').playVideo()");
+        checkPlaybackStatusRunnable.run();
         for (Callback callback : mCallbackList) {
             callback.onResumed();
         }
@@ -109,7 +106,8 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
 
     @Override
     public void setVolume(float volume) {
-        runJavascript("yt.player.getPlayerByElement('player').setVolume("+ volume * 100 +")");
+        runJavascript("yt.player.getPlayerByElement('player').setVolume("+ ((int) (volume * 100))
+                + ")");
     }
 
     @Override

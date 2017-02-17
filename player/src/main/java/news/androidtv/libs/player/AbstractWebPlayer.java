@@ -1,6 +1,8 @@
 package news.androidtv.libs.player;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -17,6 +19,7 @@ import java.util.List;
 public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
     private static final String TAG = AbstractWebPlayer.class.getSimpleName();
     private static final boolean DEBUG = false;
+    private static final boolean LOG_ERROR = true;
 
     private WebEventsListener mWebListener;
     private List<VideoEventsListener> mVideoListeners;
@@ -78,7 +81,7 @@ public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
 
             @Override
             public void onError(String message) {
-                if (DEBUG) {
+                if (DEBUG || LOG_ERROR) {
                     Log.e(TAG, message);
                 }
             }
@@ -104,11 +107,16 @@ public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
         return mWebListener;
     }
 
-    public void setVideoUrlTo(String url) {
+    public void setVideoUrlTo(final String url) {
         if (DEBUG) {
             Log.d(TAG, "Loading URL " + url);
         }
-        loadUrl(url);
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                loadUrl(url);
+            }
+        });
     }
 
     protected void runJavascript(final String js) {
