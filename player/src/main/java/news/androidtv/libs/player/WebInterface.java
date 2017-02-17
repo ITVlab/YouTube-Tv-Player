@@ -38,4 +38,9 @@ public class WebInterface {
     public void updateDuration(int position) {
         mAbstractWebPlayer.getWebEventsListener().onReceivedDuration(position);
     }
+
+    @JavascriptInterface
+    public void onError(String error) {
+        mAbstractWebPlayer.getWebEventsListener().onError(error);
+    }
 }

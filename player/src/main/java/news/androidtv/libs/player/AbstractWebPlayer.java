@@ -75,6 +75,13 @@ public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
             public void onReceivedDuration(long duration) {
                 mDuration = duration;
             }
+
+            @Override
+            public void onError(String message) {
+                if (DEBUG) {
+                    Log.e(TAG, message);
+                }
+            }
         };
         getSettings().setJavaScriptEnabled(true);
         getSettings().setSupportZoom(false);
@@ -109,10 +116,10 @@ public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
             @Override
             public void run() {
                 if (DEBUG) {
-                    if (js.length() < 50) {
+                    if (js.length() < 80) {
                         Log.d(TAG, "Execute " + js);
                     } else {
-                        Log.d(TAG, "Execute " + js.substring(0, 49));
+                        Log.d(TAG, "Execute " + js.substring(0, 79));
                     }
                 }
                 loadUrl("javascript:try { " + js + "} catch(error) { Android.onError(error.message) }");
@@ -141,6 +148,7 @@ public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
         void onVideoStatusEnded();
         void onPositionChanged(long position);
         void onReceivedDuration(long duration);
+        void onError(String message);
     }
 
     public interface VideoEventsListener {
