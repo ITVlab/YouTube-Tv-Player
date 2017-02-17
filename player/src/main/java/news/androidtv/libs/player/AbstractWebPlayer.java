@@ -16,7 +16,7 @@ import java.util.List;
  */
 public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
     private static final String TAG = AbstractWebPlayer.class.getSimpleName();
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private WebEventsListener mWebListener;
     private List<VideoEventsListener> mVideoListeners;
