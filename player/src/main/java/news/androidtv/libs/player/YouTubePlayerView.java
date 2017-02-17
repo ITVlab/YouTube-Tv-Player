@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackControls {
     private boolean isVideoPlaying;
-    private List<Callback> mCallbackList = null;
+    private List<Callback> mCallbackList = new ArrayList<>();
 
     private Runnable checkPlaybackStatusRunnable = new Runnable() {
         @Override
@@ -59,6 +59,7 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
     protected void onPlayVideo() {
         runJavascript("yt.player.getPlayerByElement('player').playVideo();");
         runJavascript("Android.updateDuration(yt.player.getPlayerByElement('player').getDuration());");
+        setVolume(1);
         isVideoPlaying = true;
         checkPlaybackStatusRunnable.run();
         for (Callback callback : mCallbackList) {
