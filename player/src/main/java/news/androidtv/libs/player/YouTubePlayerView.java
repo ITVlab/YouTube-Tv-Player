@@ -2,9 +2,11 @@ package news.androidtv.libs.player;
 
 import android.content.Context;
 import android.media.PlaybackParams;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,8 @@ import java.util.List;
  * Created by Nick on 10/27/2016.
  */
 public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackControls {
+    private static final String TAG = YouTubePlayerView.class.getSimpleName();
+
     private boolean isVideoPlaying;
     private String mVideoId;
     private List<Callback> mCallbackList = new ArrayList<>();
@@ -25,9 +29,9 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
         @Override
         public void run() {
             if (isVideoPlaying) {
-                runJavascript("if (player.getPlayerState() == 0) { Android.videoEnded(); }");
-                runJavascript("Android.updatePosition(player.getCurrentTime());");
-//                new Handler(Looper.getMainLooper()).postDelayed(this, 100);
+                runJavascript("if (player.ended) { Android.videoEnded(); }");
+                runJavascript("Android.updatePosition(player.currentTime);");
+                new Handler(Looper.getMainLooper()).postDelayed(this, 100);
             }
         }
     };
@@ -50,25 +54,16 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
 
     public void loadVideo(String videoId) {
         mVideoId = videoId;
-        setVideoUrlTo("https://www.youtube.com/embed/" + videoId);
+        setVideoUrlTo("https://www.youtube.com/embed/" + videoId + "?autoplay=1&enablejsapi=1&html5=1");
 
     }
 
     @Override
     protected void onPlayVideo() {
-        // Now first, we need to do more JS injection to get the right scripts.
-       /* runJavascript("var tag = document.createElement('script');\n" +
-                "tag.src = \"https://www.youtube.com/iframe_api\";\n" +
-                "var firstScriptTag = document.getElementsByTagName('script')[0];\n" +
-                "firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);");
-        runJavascript("function onYouTubeIframeAPIReady() { window.player = new YT.Player('player', {\n" +
-                "          height: '100%',\n" +
-                "          width: '100%',\n" +
-                "          videoId: '" + mVideoId + "',\n" +
-                "          events: { 'onReady': function() { player.playVideo() } }" +
-                "        }); console.log('111'); }");*/
-
-        runJavascript("player.playVideo();");
+        // Now first, we need to do more JS injection to get the right element.
+        Log.d(TAG, "Get ready to play.");
+        runJavascript("window.player = document.querySelector('.html5-main-video');");
+        runJavascript("player.play();");
         runJavascript("Android.updateDuration(player.getDuration());");
         setVolume(1);
         isVideoPlaying = true;
@@ -116,18 +111,19 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
 
     @Override
     public void setPlaybackParams(PlaybackParams params) {
-        // FIXME to implement
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            runJavascript("player.playbackRate = " + params.getSpeed());
+        }
     }
 
     @Override
     public void setVolume(float volume) {
-        runJavascript("player.setVolume("+ ((int) (volume * 100))
-                + ")");
+        runJavascript("player.volume = " + volume);
     }
 
     @Override
     public void pause() {
-        runJavascript("player.pauseVideo()");
+        runJavascript("player.pause()");
         for (Callback callback : mCallbackList) {
             callback.onPaused();
         }
@@ -135,6 +131,6 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
 
     @Override
     public void skip(long ms) {
-        runJavascript("player.seekTo(" + ms + ", true)");
+        runJavascript("player.currentTime = " + (ms * 1000));
     }
 }
