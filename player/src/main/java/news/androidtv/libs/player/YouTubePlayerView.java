@@ -18,15 +18,16 @@ import java.util.List;
  */
 public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackControls {
     private boolean isVideoPlaying;
+    private String mVideoId;
     private List<Callback> mCallbackList = new ArrayList<>();
 
     private Runnable checkPlaybackStatusRunnable = new Runnable() {
         @Override
         public void run() {
             if (isVideoPlaying) {
-                runJavascript("if (yt.player.getPlayerByElement('player').getPlayerState() == 0) { Android.videoEnded(); }");
-                runJavascript("Android.updatePosition(yt.player.getPlayerByElement('player').getCurrentTime());");
-                new Handler(Looper.getMainLooper()).postDelayed(this, 100);
+                runJavascript("if (player.getPlayerState() == 0) { Android.videoEnded(); }");
+                runJavascript("Android.updatePosition(player.getCurrentTime());");
+//                new Handler(Looper.getMainLooper()).postDelayed(this, 100);
             }
         }
     };
@@ -48,13 +49,27 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
     }
 
     public void loadVideo(String videoId) {
+        mVideoId = videoId;
         setVideoUrlTo("https://www.youtube.com/embed/" + videoId);
+
     }
 
     @Override
     protected void onPlayVideo() {
-        runJavascript("yt.player.getPlayerByElement('player').playVideo();");
-        runJavascript("Android.updateDuration(yt.player.getPlayerByElement('player').getDuration());");
+        // Now first, we need to do more JS injection to get the right scripts.
+       /* runJavascript("var tag = document.createElement('script');\n" +
+                "tag.src = \"https://www.youtube.com/iframe_api\";\n" +
+                "var firstScriptTag = document.getElementsByTagName('script')[0];\n" +
+                "firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);");
+        runJavascript("function onYouTubeIframeAPIReady() { window.player = new YT.Player('player', {\n" +
+                "          height: '100%',\n" +
+                "          width: '100%',\n" +
+                "          videoId: '" + mVideoId + "',\n" +
+                "          events: { 'onReady': function() { player.playVideo() } }" +
+                "        }); console.log('111'); }");*/
+
+        runJavascript("player.playVideo();");
+        runJavascript("Android.updateDuration(player.getDuration());");
         setVolume(1);
         isVideoPlaying = true;
         checkPlaybackStatusRunnable.run();
@@ -72,7 +87,7 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
 
     @Override
     public void play() {
-        runJavascript("yt.player.getPlayerByElement('player').playVideo()");
+        runJavascript("player.playVideo()");
         checkPlaybackStatusRunnable.run();
         for (Callback callback : mCallbackList) {
             callback.onResumed();
@@ -106,13 +121,13 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
 
     @Override
     public void setVolume(float volume) {
-        runJavascript("yt.player.getPlayerByElement('player').setVolume("+ ((int) (volume * 100))
+        runJavascript("player.setVolume("+ ((int) (volume * 100))
                 + ")");
     }
 
     @Override
     public void pause() {
-        runJavascript("yt.player.getPlayerByElement('player').pauseVideo()");
+        runJavascript("player.pauseVideo()");
         for (Callback callback : mCallbackList) {
             callback.onPaused();
         }
@@ -120,6 +135,6 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
 
     @Override
     public void skip(long ms) {
-        runJavascript("yt.player.getPlayerByElement('player').seekTo(" + ms + ", true)");
+        runJavascript("player.seekTo(" + ms + ", true)");
     }
 }
