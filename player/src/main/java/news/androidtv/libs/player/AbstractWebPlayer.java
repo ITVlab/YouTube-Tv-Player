@@ -17,6 +17,7 @@ import java.util.List;
  * Created by Nick on 10/27/2016.
  */
 public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2526.35 Safari/537.36";
     private static final String TAG = AbstractWebPlayer.class.getSimpleName();
     private static final boolean DEBUG = false;
     private static final boolean LOG_ERROR = true;
@@ -91,7 +92,7 @@ public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
         getSettings().setSupportMultipleWindows(false);
         setWebViewClient(new WebPlayerClient(this, mWebListener));
         addJavascriptInterface(new WebInterface(context, this), "Android");
-        getSettings().setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.35 Safari/537.36"); //Claim to be a desktop
+        getSettings().setUserAgentString(USER_AGENT); //Claim to be a desktop
         setKeepScreenOn(true);
     }
 

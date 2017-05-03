@@ -29,9 +29,9 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
         @Override
         public void run() {
             if (isVideoPlaying) {
-                runJavascript("if (player.ended) { Android.videoEnded(); }");
-                runJavascript("Android.updatePosition(player.currentTime);");
-                new Handler(Looper.getMainLooper()).postDelayed(this, 100);
+                runJavascript("if (player && player.ended) { Android.videoEnded(); }");
+                runJavascript("if (player) { Android.updatePosition(player.currentTime); }");
+                new Handler(Looper.getMainLooper()).postDelayed(this, 200);
             }
         }
     };
@@ -54,7 +54,7 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
 
     public void loadVideo(String videoId) {
         mVideoId = videoId;
-        setVideoUrlTo("https://www.youtube.com/embed/" + videoId + "?autoplay=1&enablejsapi=1&html5=1");
+        setVideoUrlTo("https://www.youtube.com/embed/" + videoId + "?enablejsapi=1&html5=1");
 
     }
 
@@ -63,7 +63,8 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
         // Now first, we need to do more JS injection to get the right element.
         Log.d(TAG, "Get ready to play.");
         runJavascript("window.player = document.querySelector('.html5-main-video');");
-        runJavascript("player.play();");
+        runJavascript("player.click();");
+//        runJavascript("player.play();");
         runJavascript("Android.updateDuration(player.getDuration());");
         setVolume(1);
         isVideoPlaying = true;
