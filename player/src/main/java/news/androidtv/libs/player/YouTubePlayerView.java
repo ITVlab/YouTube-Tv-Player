@@ -21,6 +21,7 @@ import java.util.List;
 public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackControls {
     private static final String TAG = YouTubePlayerView.class.getSimpleName();
 
+    private boolean isVideoStarted;
     private boolean isVideoPlaying;
     private String mVideoId;
     private List<Callback> mCallbackList = new ArrayList<>();
@@ -28,10 +29,16 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
     private Runnable checkPlaybackStatusRunnable = new Runnable() {
         @Override
         public void run() {
-            if (isVideoPlaying) {
+            if (isVideoStarted) {
                 runJavascript("if (player && player.ended) { Android.videoEnded(); }");
                 runJavascript("if (player) { Android.updatePosition(player.currentTime); }");
                 new Handler(Looper.getMainLooper()).postDelayed(this, 200);
+            }
+            if (isVideoPlaying) {
+                runJavascript("if (player) { player.play() }"); // Verify that our video should be playing.
+            }
+            if (!isVideoPlaying) {
+                runJavascript("if (player) { player.pause() }"); // Verify that our video should be paused.
             }
         }
     };
@@ -64,9 +71,10 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
         Log.d(TAG, "Get ready to play.");
         runJavascript("window.player = document.querySelector('.html5-main-video');");
         runJavascript("player.click();");
-//        runJavascript("player.play();");
+        runJavascript("player.play();");
         runJavascript("Android.updateDuration(player.getDuration());");
         setVolume(1);
+        isVideoStarted = true;
         isVideoPlaying = true;
         checkPlaybackStatusRunnable.run();
         for (Callback callback : mCallbackList) {
@@ -75,6 +83,7 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
     }
 
     protected void onEndVideo() {
+        isVideoStarted = false;
         isVideoPlaying = false;
         for (Callback callback : mCallbackList) {
             callback.onCompleted();
@@ -84,6 +93,7 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
     @Override
     public void play() {
         runJavascript("player.playVideo()");
+        isVideoPlaying = true;
         checkPlaybackStatusRunnable.run();
         for (Callback callback : mCallbackList) {
             callback.onResumed();
@@ -125,6 +135,7 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
     @Override
     public void pause() {
         runJavascript("player.pause()");
+        isVideoPlaying = false;
         for (Callback callback : mCallbackList) {
             callback.onPaused();
         }
@@ -133,5 +144,9 @@ public class YouTubePlayerView extends AbstractWebPlayer implements PlaybackCont
     @Override
     public void skip(long ms) {
         runJavascript("player.currentTime = " + (ms * 1000));
+    }
+
+    public String getVideoId() {
+        return mVideoId;
     }
 }

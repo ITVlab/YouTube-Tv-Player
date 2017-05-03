@@ -19,8 +19,8 @@ import java.util.List;
 public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2526.35 Safari/537.36";
     private static final String TAG = AbstractWebPlayer.class.getSimpleName();
-    private static final boolean DEBUG = false;
-    private static final boolean LOG_ERROR = true;
+    private static boolean DEBUG = false;
+    private static boolean LOG_ERROR = true;
 
     private WebEventsListener mWebListener;
     private List<VideoEventsListener> mVideoListeners;
@@ -45,6 +45,14 @@ public abstract class AbstractWebPlayer extends WebView implements TvPlayer {
     public AbstractWebPlayer(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         initialize(context);
+    }
+
+    public void setDebug(boolean debug) {
+        DEBUG = debug;
+    }
+
+    public void setLogError(boolean debug) {
+        DEBUG = debug;
     }
 
     private void initialize(Context context) {
